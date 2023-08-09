@@ -1,0 +1,104 @@
+  //GET: TestApi
+        [AllowAnonymous]
+        public ActionResult TestApiCall()
+        {
+            ViewBag.PageHeader = "Test Api Call";
+            objCommmon = new global::CommonSchool();
+            string errMsg = objCommmon.CheckUIDIsValid(Request);
+            if (!string.IsNullOrEmpty(errMsg))
+            {
+                ViewBag.ErrorMessage = errMsg;
+                return View("Error");
+            }
+            else
+            {
+                ViewBag.PagePath = objPagePath.GetPagePath(Session["COMMMEM_ID"].ToString(), "", "/TestApi/TestApiCall", _CurSession, "TestApi > TestApiCall");
+
+                #region Test Api Code
+                List<testModel> result = new List<testModel>();
+                TestApiparameterModel data = new TestApiparameterModel();
+                data.ClientId = "99";
+                data.CommMem_Id = "SKP1";
+
+                //TestApiparametr2Model data2 = new TestApiparametr2Model();
+                //data2.AutoId = 1;
+                //data2.Name = "rahul";
+
+                //List<testModel> test2 = new List<testModel>();
+                TestApiModel test2 = new TestApiModel();
+                testModel test3 = new testModel();
+                using (var client = new HttpClient())
+                {
+                    
+                    //ServicePointManager.Expect100Continue = true;
+                    //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                    //Dictionary<string,string> parameters = new Dictionary<string,string>();
+                    //parameters.Add("id", data2.AutoId.ToString());
+                    //parameters.Add("Name", data2.Name);
+
+                    //client.BaseAddress = new Uri("http://mapi.iycworld.com/");
+                    // client.BaseAddress = new Uri(Baseurl);
+
+                    client.DefaultRequestHeaders.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var formData = new MultipartFormDataContent();
+                    formData.Add(new StringContent("99"), "ClientId");
+                    formData.Add(new StringContent("SKP1"), "CommMem_Id");
+
+                    string myContent = JsonConvert.SerializeObject(data);
+                    var content = new StringContent(myContent);
+
+                    HttpResponseMessage Res = client.PostAsync("http://mapi.iycworld.com/api/DigitalSchool/ParentProfile", formData).Result;
+                    //var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+                    //var byteContent = new ByteArrayContent(buffer);
+                    //byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+
+                    //var stringContent = new StringContent(myContent, Encoding.UTF8, "application/json");
+
+                    //HttpContent DictionaryItems = new FormUrlEncodedContent(parameters);
+                    //MultipartFormDataContent form = new MultipartFormDataContent();
+                    //form.Add(byteContent);
+                    //form.Add(DictionaryItems);
+                    //var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    //contentString.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    //   var Res = client.PostAsync("api/DigitalSchool/ParentProfile", formData).Result;
+
+                    //var dict = new Dictionary<string, string>
+                    //{
+                    //    { "ClientId", "99" },
+                    //    { "CommMem_Id", "SKP1" }
+                    //};
+                    //var values = new MultipartFormDataContent(dict);
+
+
+
+                    // HttpResponseMessage Res = await client.PostAsync("api/DigitalSchool/ParentProfile?ClientId=99&CommMem_Id=SKP1", byteContent);
+                    //    res =  client.PostAsync("http://mapi.iycworld.com/api/DigitalSchool/ParentProfile"+data, new StringContent(new JavaScriptSerializer().Serialize(data), Encoding.UTF8, "application/json")).Result;
+
+                    //  var Res =  client.PostAsync("api/DigitalSchool/GetDetailsOntheBasisOfDropDownBhavans", null).Result;
+                    //   HttpResponseMessage Res = await client.PutAsync("TestApi/GetStudent", new StringContent(new JavaScriptSerializer().Serialize(data2.Name), Encoding.UTF8, "application/json"));
+
+                    // var Res = client.PostAsync("TestApi/GetStudent?Name=rahul", new StringContent(new JavaScriptSerializer().Serialize(data2.Name), Encoding.UTF8, "application/json")).Result;
+
+                    if (Res.IsSuccessStatusCode)
+                    {
+                        var record = Res.Content.ReadAsStringAsync().Result;
+                        //test2 = JsonConvert.DeserializeObject<TestApiModel>(record);
+                        test3 = JsonConvert.DeserializeObject<testModel>(value:record);
+                        result.Add(test3);
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Failed To Connect";
+                    }
+                    
+
+
+                    return View(result);
+                }
+                #endregion
+            }

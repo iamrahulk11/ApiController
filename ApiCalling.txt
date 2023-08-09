@@ -1,0 +1,180 @@
+using Newtonsoft.Json;
+using NLog;
+using School.DAL.ADODAL;
+using School.Entity.Model.TestApi;
+using School.Service;
+using School.Service.TestApi;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Collections;
+using System.Data;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web;
+using System.Web.Mvc;
+using System.Web.Script.Serialization;
+
+namespace MISDoha.Controllers
+{
+    public class TestApiController : Controller
+    {
+        Logger logger = null;
+        clsPagePathService objPagePath = null;
+        CommonSchool objCommmon = null;
+        TestAPIService objService = null;
+
+        
+        //string _SchoolID = ConfigurationManager.AppSettings["schoolid"];
+        //string _MainTitle = ConfigurationManager.AppSettings["MainTitle"];
+        string _CurSession = ConfigurationManager.AppSettings["currentsession"];
+        public TestApiController()
+        {
+            if (logger == null)
+                logger = LogManager.GetCurrentClassLogger();
+            if (objService == null)
+                objService = new TestAPIService(TestAPIService.DALConnection.EntityConnection);
+            if (objPagePath == null)
+                objPagePath = new clsPagePathService(clsPagePathService.DALConnection.ADOConnection);
+
+        }
+
+        string Baseurl = "http://localhost:1226/";
+       //GET: TestApi
+     
+        public ActionResult TestApiCall()
+        {
+            ViewBag.PageHeader = "Test Api Call";
+            objCommmon = new global::CommonSchool();
+            string errMsg = objCommmon.CheckUIDIsValid(Request);
+            if (!string.IsNullOrEmpty(errMsg))
+            {
+                ViewBag.ErrorMessage = errMsg;
+                return View("Error");
+            }
+            else
+            {
+                ViewBag.PagePath = objPagePath.GetPagePath(Session["COMMMEM_ID"].ToString(), "", "/TestApi/TestApiCall", _CurSession, "TestApi > TestApiCall");
+
+                #region Test Api Code
+                List<testModel> result = new List<testModel>();
+                TestApiparameterModel data = new TestApiparameterModel();
+                data.ClientId = "99";
+                data.CommMem_Id = "SKP1";
+
+                TestApiparametr2Model data2 = new TestApiparametr2Model();
+                data2.AutoId = 1;
+                data2.Name = "rahul";
+
+                //List<testModel> test2 = new List<testModel>();
+                TestApiModel test2 = new TestApiModel();
+                testModel test3 = new testModel();
+                using (var client = new HttpClient())
+                {
+                    //ServicePointManager.Expect100Continue = true;
+                    //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                    //Dictionary<string,string> parameters = new Dictionary<string,string>();
+                    //parameters.Add("id", data2.AutoId.ToString());
+                    //parameters.Add("Name", data2.Name);
+
+                    client.BaseAddress = new Uri("http://mapi.iycworld.com/");
+                    // client.BaseAddress = new Uri(Baseurl);
+                    client.DefaultRequestHeaders.Clear();
+
+                    //   client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+
+                    //var myContent = JsonConvert.SerializeObject(data2);
+                    //var buffer = System.Text.Encoding.UTF8.GetBytes(myContent);
+                    //var byteContent = new ByteArrayContent(buffer);
+                    //byteContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+
+                    //var stringContent = new StringContent(myContent, Encoding.UTF8, "application/json");
+
+                    //HttpContent DictionaryItems = new FormUrlEncodedContent(parameters);
+                    //MultipartFormDataContent form = new MultipartFormDataContent();
+                    //form.Add(byteContent);
+                    //form.Add(DictionaryItems);
+                    //var contentString = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    //contentString.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                    var dict = new Dictionary<string, string>
+            {
+                { "ClientId", "99" },
+                { "CommMem_Id", SKP1 }
+            };
+                    var values = new FormUrlEncodedContent(dict);
+
+                    // HttpResponseMessage Res = await client.PostAsync("api/DigitalSchool/ParentProfile?ClientId=99&CommMem_Id=SKP1", byteContent);
+                    var Res =  client.PostAsync("api/DigitalSchool/ParentProfile?ClientId=99&CommMem_Id=SKP1", new StringContent(new JavaScriptSerializer().Serialize(data2.Name), Encoding.UTF8,"application/json")).Result;
+                    //   HttpResponseMessage Res = await client.PutAsync("TestApi/GetStudent", new StringContent(new JavaScriptSerializer().Serialize(data2.Name), Encoding.UTF8, "application/json"));
+
+                   // var Res = client.PostAsync("TestApi/GetStudent?Name=rahul", new StringContent(new JavaScriptSerializer().Serialize(data2.Name), Encoding.UTF8, "application/json")).Result;
+                  
+                    if (Res.IsSuccessStatusCode)
+                    {
+                        var record = Res.Content.ReadAsStringAsync().Result;
+                        //test2 = JsonConvert.DeserializeObject<TestApiModel>(record);
+                        test3 = JsonConvert.DeserializeObject<testModel>(value:record);
+                        result.Add(test3);
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Failed To Connect";
+                    }
+                    
+
+
+                    return View(result);
+                }
+                #endregion
+            }
+        }
+
+       //try locally
+        [HttpGet]
+        public JsonResult GetAllStudents()
+        {
+            List<testModel> test = new List<testModel>();
+            string query = string.Format(@"Select * from testDbo");
+            DataTable dt = clsDBManager.GetDataTable(query);
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+
+                testModel std = new testModel();
+                std.Name = Convert.ToString(dt.Rows[i].ItemArray[0]);
+                std.MobileNo = dt.Rows[i].ItemArray[1].ToString();
+                std.EMail = dt.Rows[i].ItemArray[2].ToString();
+                std.Address = dt.Rows[i].ItemArray[3].ToString();
+                test.Add(std);
+            }
+
+            return Json(test,JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GetStudent(string Name)
+        {
+            testModel std = new testModel();
+            string query = string.Format(@"Select * from testDbo where Name='{0}'",  Name);
+            DataTable dt = clsDBManager.GetDataTable(query);
+            if (dt.Rows.Count > 0)
+            {                
+               
+                std.Name = Convert.ToString(dt.Rows[0].ItemArray[1].ToString());
+                std.MobileNo = dt.Rows[0].ItemArray[2].ToString();
+                std.EMail = dt.Rows[0].ItemArray[3].ToString();
+                std.Address = dt.Rows[0].ItemArray[4].ToString();
+            }
+               
+            return Json(std, JsonRequestBehavior.AllowGet);
+        }
+
+    }
+}
