@@ -1,0 +1,93 @@
+app.controller('TestApiCtrl', [ '$scope', '$log', '$window', '$http', function ( $scope, $log, $window, $http, req, res, next) {
+//    $httpProvider.defaults.useXDomain = true;
+
+    $scope.btnGet = function () {
+//        let headers = new Headers();
+
+      //  headers.append('Content-Type', 'application/json');
+      //  headers.append('Accept', 'application/json');
+  headers.append('Authorization', 'Basic ' + base64.encode(username + ":" + password));
+      // // headers.append('Origin', 'http://localhost:1226');
+      //  headers.append('Access-Control-Allow-Origin', 'http://localhost:1226');
+      //  headers.append('Access-Control-Allow-Credentials', 'true');
+      //  headers.append('X-Requested-With', 'XMLHttpRequest');
+
+
+        $.ajax({
+            url: "http://mapi.iycworld.com/api/DigitalSchool/GetDetailsOntheBasisOfDropDownBhavans",
+            contentType: 'application/form-data',
+            type: "POST", /* or type:"GET" or type:"PUT" */
+            dataType: "json",            
+            success: function (result) {
+                console.log(result);
+            },
+            error: function () {
+                console.log("error");
+            }
+        });
+
+
+        //var userdata = new FormData();
+        //userdata.append('ClientId', "99");
+        //userdata.append('CommMem_Id', "SKP1");
+        ////data.ClientId = "99";
+        //data.CommMem_Id = "SKP1";
+        //var response = $http({
+        //    method: "POST",
+        //    headers: headers,
+            
+        //    url: "http://mapi.iycworld.com/api/DigitalSchool/GetDetailsOntheBasisOfDropDownBhavans",
+        //    dataType: "json",
+        //});
+        //response.then(function (result) {
+        //    console.log(result);
+        //},
+        //    function (error) {
+        //        ShowMessage(error.data, "error", "top-center", 4000, false);
+        //    });
+    }
+        //var url = "http://samples.openweathermap.org/data/2.5/forecast?id=524901&appid=b1b15e88fa797225412429c1c50c122a1";
+        //$http(url)
+        //    .then(function onSuccess(response) {
+        //        var data = response.data;
+        //    }).catch(function onError(response) {
+        //        var data = response.data;
+        //    });
+    
+
+    //    $.ajax({
+    //        url:
+    //        headers: {
+    //            'Content-Type': 'application/x-www-form-urlencoded'
+    //        },
+    //        type: "GET", /* or type:"GET" or type:"PUT" */
+    //        dataType: "json",
+    //        data: {
+    //        },
+    //        success: function (result) {
+    //            console.log(result);
+    //        },
+    //        error: function () {
+    //            console.log("error");
+    //        }
+    //    });
+    //    //$http({
+    //    //    method: 'GET',
+    //    //    url: '/someUrl'
+    //    //}).then(function successCallback(response) {
+    //    //    // this callback will be called asynchronously
+    //    //    // when the response is available
+    //    //}, function errorCallback(response) {
+    //    //    // called asynchronously if an error occurs
+    //    //    // or server returns response with an error status.
+    //    //});
+    //    //$http.get("http://samples.openweathermap.org/data/2.5/forecast?id=524901&appid=b1b15e88fa797225412429c1c50c122a1").then(
+    //    //    function successCallback(response) {
+    //    //        console.log(response);
+    //    //    },
+    //    //    function errorCallback(response) {
+    //    //        console.log("Unable to perform get request");
+    //    //    });
+    //}
+    
+}]);
