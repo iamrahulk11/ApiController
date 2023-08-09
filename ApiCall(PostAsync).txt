@@ -1,3 +1,100 @@
+====================================================== Testing 
+public class TestApiModel
+    {
+        public bool Status { get; set; }
+        public bool Error { get; set; }
+        public TestApiReponseData Response { get; set; }
+        public string Message { get; set; }
+    }
+
+    public class TestApiReponseData
+    {
+        //"Name": "Vishal  Kumar",
+        //   "MobileNo": "-",
+        //   "EMail": "vishalmohan14@gmail.com",
+        //   "Address": "-",
+        //   "Qualification": "-",
+        //   "Occupation": "MANAGER ACCOUNTS",
+        //   "Designation": "-",
+        //   "SpouseName": "Saloni  Priya",
+        //   "SpouseMobileNo": "971559490046",
+        //   "SpouseEMail": "vishalmohan14@gmail.com",
+        //   "SpouseAddress": "-",
+        //   "SpouseQualification": "-",
+        //   "SpouseOccupation": "House Wife",
+        //   "SpouseDesignation": "-",
+        //   "ImageURL": "-"
+        public string Name { get; set; }
+    public string MobileNo { get; set; }
+    public string EMail { get; set; }
+    public string Address { get; set; }
+    public string Qualification { get; set; }
+    public string Occupation { get; set; }
+    public string Designation { get; set; }
+    public string SpouseName { get; set; }
+    public string SpouseMobileNo { get; set; }
+    public string SpouseEMail { get; set; }
+    public string SpouseAddress { get; set; }
+    public string SpouseQualification { get; set; }
+    public string SpouseOccupation { get; set; }
+    public string SpouseDesignation { get; set; }
+    public string ImageURL { get; set; }
+    }
+
+  public ActionResult TestApiCall()
+        {
+            ViewBag.PageHeader = "Test Api Call";
+            objCommmon = new global::CommonSchool();
+            string errMsg = objCommmon.CheckUIDIsValid(Request);
+            if (!string.IsNullOrEmpty(errMsg))
+            {
+                ViewBag.ErrorMessage = errMsg;
+                return View("Error");
+            }
+            else
+            {
+                ViewBag.PagePath = objPagePath.GetPagePath(Session["COMMMEM_ID"].ToString(), "", "/TestApi/TestApiCall", _CurSession, "TestApi > TestApiCall");
+
+                #region Test Api Code
+                TestApiparameterModel data = new TestApiparameterModel();
+                data.ClientId = "99";
+                data.CommMem_Id = "SKP1";
+
+                TestApiReponseData objData = new TestApiReponseData();
+                TestApiModel model = new TestApiModel();
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    var formData = new MultipartFormDataContent();
+                    formData.Add(new StringContent("99"), "ClientId");
+                    formData.Add(new StringContent("SKP1"), "CommMem_Id");
+
+                    string myContent = JsonConvert.SerializeObject(data);
+                    var content = new StringContent(myContent);
+
+                    HttpResponseMessage Res = client.PostAsync("http://mapi.iycworld.com/api/DigitalSchool/ParentProfile", formData).Result;                 
+
+                    if (Res.IsSuccessStatusCode)
+                    {
+                        var record = Res.Content.ReadAsStringAsync().Result;                    
+                        model = JsonConvert.DeserializeObject<TestApiModel>(record);
+                        objData.Name = model.Response.Name;
+                    }
+                    else
+                    {
+                        ViewBag.Message = "Failed To Connect";
+                    }
+                }
+                return View(objData);
+                #endregion
+            }
+
+===============================================================
+
+
+
   //GET: TestApi
         [AllowAnonymous]
         public ActionResult TestApiCall()
